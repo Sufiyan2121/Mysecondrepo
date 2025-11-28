@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>User Details — Minimal Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="card" role="main">
+        <section>
+            <h1>Enter user details</h1>
+            <p class="lead">A minimal, accessible form to collect basic user information.</p>
+
+            <form id="userForm" autocomplete="on" novalidate>
+                <div class="row">
+                    <div class="col">
+                        <label for="firstName">First name</label>
+                        <input id="firstName" name="firstName" type="text" placeholder="Jane" required />
+                    </div>
+                    <div class="col">
+                        <label for="lastName">Last name</label>
+                        <input id="lastName" name="lastName" type="text" placeholder="Doe" required />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" placeholder="jane@example.com" required />
+                    </div>
+                    <div class="col">
+                        <label for="phone">Phone</label>
+                        <input id="phone" name="phone" type="tel" placeholder="+1 555 555 5555" />
+                    </div>
+                </div>
+
+                <label for="dob">Date of birth</label>
+                <input id="dob" name="dob" type="date" />
+
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" aria-label="Gender">
+                    <option value="">Prefer not to say</option>
+                    <option>Female</option>
+                    <option>Male</option>
+                    <option>Non-binary</option>
+                    <option>Other</option>
+                </select>
+
+                <label for="bio">Short bio</label>
+                <textarea id="bio" name="bio" placeholder="Tell us a bit about yourself..."></textarea>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" placeholder="Choose a secure password" required minlength="6" />
+
+                <div class="actions">
+                    <button type="submit">Save</button>
+                    <button type="button" class="secondary" id="resetBtn">Reset</button>
+                    <span class="muted" style="margin-left:auto">All fields are stored locally in this demo</span>
+                </div>
+
+                <p id="msg" class="success" role="status">Saved — demo only (no network requests).</p>
+                <p id="err" class="error" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <aside class="sidebar" aria-label="Profile preview">
+            <div style="display:flex;flex-direction:column;align-items:center;padding:12px">
+                <div class="avatar-preview" id="avatarPreview">PNG/JPG</div>
+                <label for="avatar" style="font-size:13px;margin-bottom:8px">Profile picture</label>
+                <input id="avatar" name="avatar" type="file" accept="image/*" />
+                <p class="muted" style="margin-top:12px">Preview updates when you pick an image.</p>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // Minimal client-side handling - no network calls
+        const form = document.getElementById('userForm');
+        const msg = document.getElementById('msg');
+        const err = document.getElementById('err');
+        const resetBtn = document.getElementById('resetBtn');
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        avatarInput.addEventListener('change', () => {
+            const file = avatarInput.files && avatarInput.files[0];
+            if (!file) {
+                avatarPreview.textContent = 'PNG/JPG';
+                avatarPreview.style.backgroundImage = '';
+                return;
+            }
+            const url = URL.createObjectURL(file);
+            avatarPreview.style.backgroundImage = `url(${url})`;
+            avatarPreview.style.backgroundSize = 'cover';
+            avatarPreview.style.backgroundPosition = 'center';
+            avatarPreview.textContent = '';
+        });
+
+        resetBtn.addEventListener('click', () => {
+            form.reset();
+            msg.style.display = 'none';
+            err.textContent = '';
+            avatarPreview.style.backgroundImage = '';
+            avatarPreview.textContent = 'PNG/JPG';
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            err.textContent = '';
+            msg.style.display = 'none';
+
+            const data = new FormData(form);
+            // Basic validation
+            if (!data.get('firstName') || !data.get('lastName') || !data.get('email') || !data.get('password')) {
+                err.textContent = 'Please fill the required fields: first name, last name, email and password.';
+                return;
+            }
+            // Build a small object to show (no network)
+            const obj = Object.fromEntries(data.entries());
+            // If file present, note it
+            if (avatarInput.files && avatarInput.files[0]) {
+                obj.avatar = avatarInput.files[0].name;
+            }
+
+            // Save to localStorage (demo)
+            try {
+                localStorage.setItem('user_demo', JSON.stringify(obj));
+                msg.style.display = 'block';
+                setTimeout(() => msg.style.display = 'none', 3500);
+                console.log('User saved (demo):', obj);
+            } catch (e) {
+                err.textContent = 'Unable to save locally.';
+            }
+        });
+    </script>
+</body>
+</html></aside>
